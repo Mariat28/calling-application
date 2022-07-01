@@ -1,104 +1,32 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br />
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener"
-        >vue-cli documentation</a
-      >.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel"
-          target="_blank"
-          rel="noopener"
-          >babel</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-router"
-          target="_blank"
-          rel="noopener"
-          >router</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-vuex"
-          target="_blank"
-          rel="noopener"
-          >vuex</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint"
-          target="_blank"
-          rel="noopener"
-          >eslint</a
-        >
-      </li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li>
-        <a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a>
-      </li>
-      <li>
-        <a href="https://forum.vuejs.org" target="_blank" rel="noopener"
-          >Forum</a
-        >
-      </li>
-      <li>
-        <a href="https://chat.vuejs.org" target="_blank" rel="noopener"
-          >Community Chat</a
-        >
-      </li>
-      <li>
-        <a href="https://twitter.com/vuejs" target="_blank" rel="noopener"
-          >Twitter</a
-        >
-      </li>
-      <li>
-        <a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a>
-      </li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li>
-        <a href="https://router.vuejs.org" target="_blank" rel="noopener"
-          >vue-router</a
-        >
-      </li>
-      <li>
-        <a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-devtools#vue-devtools"
-          target="_blank"
-          rel="noopener"
-          >vue-devtools</a
-        >
-      </li>
-      <li>
-        <a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener"
-          >vue-loader</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-          rel="noopener"
-          >awesome-vue</a
-        >
-      </li>
-    </ul>
+  <div class="w-full h-full flex flex-col items-center gap-3">
+    <div class="flex gap-2 justify-center">
+      <button
+        class="bg-green-600 font-semibold text-white rounded-sm shadow-sm p-2 hover:text-green-600 hover:border hover:border-green-600 hover:bg-transparent"
+        @click="initiateMediaDevices"
+      >
+        Call patient
+      </button>
+      <button
+        class="bg-red-500 font-semibold text-white rounded-sm shadow-sm p-2 hover:text-red-500 hover:border hover:border-red-500 hover:bg-transparent"
+        @click="initiateMediaDevices"
+      >
+        Hang up
+      </button>
+      <button
+        class="bg-slate-500 font-semibold text-white rounded-sm shadow-sm p-2 hover:text-slate-500 hover:border hover:border-slate-500 hover:bg-transparent"
+        @click="initiateMediaDevices"
+      >
+        View logs
+      </button>
+    </div>
+    <div class="bg-black h-[500px] w-1/2" v-if="isVideoOn">caller div</div>
+    <div class="bg-slate-100 h-96 w-1/3 p-2" v-else>
+      <span>Select preferred device from the connected devices list</span>
+      <div v-for="(device, index) in deviceList" :key="index">
+        <input type="text" class="outline-none p-2" :value="device" readonly />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -107,6 +35,35 @@ export default {
   name: "HelloWorld",
   props: {
     msg: String,
+  },
+  data() {
+    return {
+      isVideoOn: false,
+      deviceList: [],
+    };
+  },
+
+  methods: {
+    initiateMediaDevices() {
+      const constraints = {
+        video: true,
+        audio: true,
+      };
+      navigator.mediaDevices
+        .getUserMedia(constraints)
+        .then((stream) => {
+          console.log("got media stream", stream);
+          this.getConnectedDevices("video");
+        })
+        .catch((error) => {
+          console.error("Error accessing media devices", error);
+        });
+    },
+    async getConnectedDevices(type) {
+      this.devices = await navigator.mediaDevices.enumerateDevices();
+      console.log("connected devices", this.devices);
+      return this.devices.filter((device) => device.kind === type);
+    },
   },
 };
 </script>
